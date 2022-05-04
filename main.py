@@ -49,6 +49,7 @@ class meme_process():
         self.retry_count = 10
 
     def generate_imge_text_pair(self):
+        #self.path = image_lib+'3_30_w_blackguystop_10_200_125_225_220_x_100_195_10_200_415_505.jpg'
         self.path = image_lib+random.choice(image_filenames)
         self.meme_type = int(os.path.basename(self.path)[0])
         self.img = Image.open(self.path)
@@ -175,6 +176,6 @@ m.img.show()
 m.img.save("test.png")
 
 t = twitter_action()
-t.upload_image(tweet='#meme #迷因 #memeteller #bonk',img='./test.png')
+#t.upload_image(tweet='#meme #迷因 #memeteller #bonk',img='./test.png')
 m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
 #os.system("lpr -o media=meme_size test.png")
