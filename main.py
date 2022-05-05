@@ -7,7 +7,19 @@ import os
 import random
 import tweepy
 import json
+import cv2
+import pygame
+import subprocess
+import threading
+import time
 from os import walk
+from Quartz import CGDisplayBounds
+from Quartz import CGMainDisplayID
+
+def screen_size():
+    mainMonitor = CGDisplayBounds(CGMainDisplayID())
+    return (mainMonitor.size.width, mainMonitor.size.height) 
+
 image_lib = './meme_blank/'
 txt_lib = './caption/'
 output = './output/'
@@ -65,12 +77,12 @@ class meme_process():
         return False
 
     def check_duplicate(self,name,line):
-        tmp = f"{name}_{line}.png" 
+        tmp = f"{name}_{line}.png"
         if tmp in output_filenames:
             print(f"{tmp} Duplicated ")
-            return True
-        else:
             return False
+        else:
+            return True
 
     def insert_text(self, font_in='Arial.ttf', size_in=50, img=None, text='', area=[0,-1,0,200], fill='#000000'):
         if img == None:
@@ -114,7 +126,7 @@ class meme_process():
     def avoid_duplicate(self):
         while 1:
             self.generate_imge_text_pair()
-            if self.check_duplicate(self.filename_list[4],self.res[1]):
+            if self.check_duplicate(self.filename_list[3],self.res[1]):
                 break
             elif self.retry_count ==0:
                 break
@@ -167,15 +179,87 @@ class meme_process():
             self.insert_text(font_in=font, text=caption, area=area, size_in=self.size_in, fill=fill)
 
 
-m = meme_process()
-m.avoid_duplicate()
-m.draw_text_on_img()
-m.img.show()
- 
-# Save the edited image
-m.img.save("test.png")
+def py_game_show_image(filename):
+    
+    screen_resolution = screen_size()
+    center_image = True
+    image = pygame.image.load(filename)
 
-t = twitter_action()
-#t.upload_image(tweet='#meme #迷因 #memeteller #bonk',img='./test.png')
-m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
-#os.system("lpr -o media=meme_size test.png")
+    screen_w, screen_h = screen_resolution
+    image_w, image_h = image.get_size()
+
+    screen_aspect_ratio = screen_w / screen_h
+    photo_aspect_ratio = image_w / image_h
+
+    if screen_aspect_ratio < photo_aspect_ratio:  # Width is binding
+        new_image_w = screen_w
+        new_image_h = int(new_image_w / photo_aspect_ratio)
+        image = pygame.transform.scale(image, (new_image_w, new_image_h))
+        image_x = 0
+        image_y = (screen_h - new_image_h) // 2 if center_image else 0
+
+    elif screen_aspect_ratio > photo_aspect_ratio:  # Height is binding
+        new_image_h = screen_h
+        new_image_w = int(new_image_h * photo_aspect_ratio)
+        image = pygame.transform.scale(image, (new_image_w, new_image_h))
+        image_x = (screen_w - new_image_w) // 2 if center_image else 0
+        image_y = 0
+
+    else:  # Images have the same aspect ratio
+        image = pygame.transform.scale(image, (screen_w, screen_h))
+        image_x = 0
+        image_y = 0
+
+    gameDisplay.blit(image, (image_x, image_y))
+
+
+def generate_meme(lock, cnt=10, timer=5):
+    while 1:
+        m = meme_process()
+        m.avoid_duplicate()
+        m.draw_text_on_img()
+        lock.acquire()
+        m.img.save("test.png")
+        lock.release()
+        print('display')
+        t = twitter_action()
+        #t.upload_image(tweet='#meme #迷因 #memeteller #bonk',img='./test.png')
+        m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
+        #os.system("lpr -o media=meme_size test.png")
+        time.sleep(timer)
+        if cnt<=0:
+            break
+        cnt = cnt -1
+
+
+pygame.init()
+display_width,display_height = screen_size()
+gameDisplay = pygame.display.set_mode((display_width,display_height))
+black = (0,0,0)
+white = (255,255,255)
+
+lock = threading.Lock()
+t = threading.Thread(target=generate_meme,args=(lock,5,5))
+t.start()
+clock = pygame.time.Clock()
+crashed = False
+carImg = pygame.image.load('test.png')
+
+while not crashed:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            crashed = True
+    #generate()
+    gameDisplay.fill(black)
+    if lock.acquire():
+        py_game_show_image('test.png')
+        lock.release()
+
+        
+    pygame.display.update()
+    clock.tick(60)
+
+t.join()
+pygame.quit()
+quit()
+
