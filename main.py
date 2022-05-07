@@ -12,9 +12,17 @@ import pygame
 import subprocess
 import threading
 import time
+import argparse
 from os import walk
+from os import path
 from Quartz import CGDisplayBounds
 from Quartz import CGMainDisplayID
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", help='twitter function toggle', action="store_true")
+parser.add_argument("-p", help='printer function toggle', action="store_true")
+parser.add_argument("-testimage", help='filename for testing image', type=str)
+args = parser.parse_args()
 
 def screen_size():
     mainMonitor = CGDisplayBounds(CGMainDisplayID())
@@ -61,8 +69,11 @@ class meme_process():
         self.retry_count = 10
 
     def generate_imge_text_pair(self):
-        self.path = image_lib+'6_60_w_traincrashbus_420_850_220_380_0_450_620_900.png'
-        #self.path = image_lib+random.choice(image_filenames)
+        if args.testimage:
+            #self.path = image_lib+'6_60_w_traincrashbus_420_850_220_380_0_450_620_900.png'
+            self.path = args.testimage
+        else:
+            self.path = image_lib+random.choice(image_filenames)
         self.meme_type = int(os.path.basename(self.path)[0])
         self.img = Image.open(self.path)
         self.filename_list = os.path.basename(self.path).split('.')[0].split('_')
@@ -235,63 +246,82 @@ def py_game_show_image(filename):
 
     gameDisplay.blit(image, (image_x, image_y))
 
+def upload_twitter_check(t_flag=False,filename=None):
+    if t_flag:
+        if (not filename in output_filenames):
+            t = twitter_action()
+            print('upload image to twitter')
+            #t.upload_image(tweet='#meme #迷因 #memeteller #bonk',img='./test.png')
+        else:
+            print('image existed on twitter')    
 
-def generate_meme(lock, cnt=10, timer=5):
+def generate_meme(lock, cnt=10, timer=5, t_flag=False, p_flag=False):
     while 1:
+
         m = meme_process()
         m.avoid_duplicate()
         m.draw_text_on_img()
         lock.acquire()
         m.img.save("test.png")
         lock.release()
+        save_path = output+f"{m.filename_list[3]}_{m.s}.png"
         print('display')
-        t = twitter_action()
-        #t.upload_image(tweet='#meme #迷因 #memeteller #bonk',img='./test.png')
+        upload_twitter_check(t_flag, f"{m.filename_list[3]}_{m.s}.png")
+
         m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
-        #os.system("lpr -o media=meme_size test.png")
+        if p_flag:
+            print("Print meme")
+            #os.system("lpr -o media=meme_size test.png")
         time.sleep(timer)
         if cnt<=0:
             break
         cnt = cnt -1
 
 
-def test_image():
+def test_image(t_flag=False):
     m = meme_process()
     m.avoid_duplicate()
     m.draw_text_on_img()
     m.img.show()
+    save_path = output+f"{m.filename_list[3]}_{m.s}.png"
+    upload_twitter_check(t_flag, f"{m.filename_list[3]}_{m.s}.png")
+
     m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
 
-test_image()
-"""
-pygame.init()
-display_width,display_height = screen_size()
-gameDisplay = pygame.display.set_mode((display_width,display_height))
-black = (0,0,0)
-white = (255,255,255)
 
-lock = threading.Lock()
-t = threading.Thread(target=generate_meme,args=(lock,5,5))
-t.start()
-clock = pygame.time.Clock()
-crashed = False
-carImg = pygame.image.load('test.png')
+print(f'Twitter toggle: {args.t}')
+print(f'Printer toggle: {args.p}')
+if args.testimage:
+    print(args.testimage)
+    test_image(t_flag=args.t)
+else:
+    pygame.init()
+    display_width,display_height = screen_size()
+    gameDisplay = pygame.display.set_mode((display_width,display_height))
+    black = (0,0,0)
+    white = (255,255,255)
 
-while not crashed:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            crashed = True
-    #generate()
-    gameDisplay.fill(black)
-    if lock.acquire():
-        py_game_show_image('test.png')
-        lock.release()
+    lock = threading.Lock()
+    t = threading.Thread(target=generate_meme,args=(lock, 5, 5, args.t, args.p))
+    t.start()
+    clock = pygame.time.Clock()
+    crashed = False
+    carImg = pygame.image.load('test.png')
+    while not crashed:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                crashed = True
+        #generate()
+        gameDisplay.fill(black)
+        if lock.acquire():
+            py_game_show_image('test.png')
+            lock.release()
 
-        
-    pygame.display.update()
-    clock.tick(60)
+            
+        pygame.display.update()
+        clock.tick(60)
 
-t.join()
-pygame.quit()
-quit()
-"""
+    t.join()
+    pygame.quit()
+    quit()
+
