@@ -271,21 +271,24 @@ def generate_meme(lock, cnt=10, timer=5, t_flag=False, p_flag=False):
         m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
         if p_flag:
             print("Print meme")
-            #os.system("lpr -o media=meme_size test.png")
+            os.system("lpr -o media=meme_size test.png")
         time.sleep(timer)
         if cnt<=0:
             break
         cnt = cnt -1
 
 
-def test_image(t_flag=False):
+def test_image(t_flag=False, p_flag=False):
     m = meme_process()
     m.avoid_duplicate()
     m.draw_text_on_img()
     m.img.show()
+    m.img.save("test.png")
     save_path = output+f"{m.filename_list[3]}_{m.s}.png"
     upload_twitter_check(t_flag, f"{m.filename_list[3]}_{m.s}.png")
-
+    if p_flag:
+        print("Print meme")
+        os.system("lpr -o media=meme_size test.png")
     m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
 
 
@@ -293,7 +296,7 @@ print(f'Twitter toggle: {args.t}')
 print(f'Printer toggle: {args.p}')
 if args.testimage:
     print(args.testimage)
-    test_image(t_flag=args.t)
+    test_image(t_flag=args.t,p_flag=args.p)
 else:
     pygame.init()
     display_width,display_height = screen_size()
