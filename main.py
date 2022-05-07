@@ -61,8 +61,8 @@ class meme_process():
         self.retry_count = 10
 
     def generate_imge_text_pair(self):
-        #self.path = image_lib+'3_30_w_blackguystop_10_200_125_225_220_x_100_195_10_200_415_505.jpg'
-        self.path = image_lib+random.choice(image_filenames)
+        self.path = image_lib+'6_60_w_traincrashbus_420_850_220_380_0_450_620_900.png'
+        #self.path = image_lib+random.choice(image_filenames)
         self.meme_type = int(os.path.basename(self.path)[0])
         self.img = Image.open(self.path)
         self.filename_list = os.path.basename(self.path).split('.')[0].split('_')
@@ -134,9 +134,32 @@ class meme_process():
                 self.retry_count = self.retry_count -1
 
     def draw_text_on_img(self):
-        if self.meme_type == 3:
+        if self.meme_type == 3 or self.meme_type == 4:
             area = []
             area.append(self.filename_list[-12:-8])
+            area.append(self.filename_list[-8:-4])
+            area.append(self.filename_list[-4:])
+            cap, s = self.res[0].split('|'), self.res[1]
+            for a in range(0,len(area)):
+                for i in range(0,len(area[a])):
+                    if area[a][i] == 'x':
+                        area[a][i] = -1
+                    else:
+                        area[a][i] = int(area[a][i])
+                
+                if self.is_contains_chinese(cap[a]):
+                    font = 'PingFang.ttc'
+                else:
+                    font = 'Arial.ttf'
+
+                if self.filename_list[2] =='b':
+                    fill = '#000000'
+                else:
+                    fill = '#ffffff'
+
+                self.insert_text(font_in=font,text=cap[a], area=area[a], size_in=self.size_in, fill=fill)
+        elif self.meme_type == 6:
+            area = []
             area.append(self.filename_list[-8:-4])
             area.append(self.filename_list[-4:])
             cap, s = self.res[0].split('|'), self.res[1]
@@ -232,6 +255,15 @@ def generate_meme(lock, cnt=10, timer=5):
         cnt = cnt -1
 
 
+def test_image():
+    m = meme_process()
+    m.avoid_duplicate()
+    m.draw_text_on_img()
+    m.img.show()
+    m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
+
+test_image()
+"""
 pygame.init()
 display_width,display_height = screen_size()
 gameDisplay = pygame.display.set_mode((display_width,display_height))
@@ -262,4 +294,4 @@ while not crashed:
 t.join()
 pygame.quit()
 quit()
-
+"""
