@@ -63,16 +63,16 @@ class twitter_action():
 
     
     def batch_delete(self):
-        print "You are about to Delete all tweets from the account @%s." % api.verify_credentials().screen_name
-        print "Does this sound ok? There is no undo! Type yes to carry out this action."
+        print("You are about to Delete all tweets from the account @%s." % api.verify_credentials().screen_name)
+        print("Does this sound ok? There is no undo! Type yes to carry out this action.")
         do_delete = raw_input("> ")
         if do_delete.lower() == 'yes':
             for status in tweepy.Cursor(self.api.user_timeline).items():
                 try:
                     self.api.destroy_status(status.id)
-                    print "Deleted:", status.id
+                    print ("Deleted:", status.id)
                 except:
-                    print "Failed to delete:", status.id
+                    print ("Failed to delete:", status.id)
 
 class meme_process():
 
