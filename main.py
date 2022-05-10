@@ -273,19 +273,19 @@ def generate_meme(lock, cnt=10, timer=5, t_flag=False, p_flag=False):
         m.draw_text_on_img()
         lock.acquire()
         m.img.save("test.png")
+        if p_flag:
+            print("Print meme")
+            os.system("lpr -o media=meme_size test.png")
         lock.release()
         save_path = output+f"{m.filename_list[3]}_{m.s}.png"
         print('display')
         upload_twitter_check(t_flag, f"{m.filename_list[3]}_{m.s}.png")
 
         m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
-        if p_flag:
-            print("Print meme")
-            os.system("lpr -o media=meme_size test.png")
-        time.sleep(timer)
-        if cnt<=0:
+        if crashed:
             break
-        cnt = cnt -1
+        time.sleep(timer)
+
 
 def test_image(t_flag=False, p_flag=False):
     m = meme_process()
@@ -316,6 +316,7 @@ else:
     t = threading.Thread(target=generate_meme,args=(lock, 5, 5, args.t, args.p))
     t.start()
     clock = pygame.time.Clock()
+    global crashed
     crashed = False
     carImg = pygame.image.load('test.png')
     while not crashed:
