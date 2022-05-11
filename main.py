@@ -265,7 +265,7 @@ def upload_twitter_check(t_flag=False,filename=None):
         else:
             print('image existed on twitter')    
 
-def generate_meme(lock, cnt=10, timer=5, t_flag=False, p_flag=False):
+def generate_meme(lock, cnt=10, timer=3000, t_flag=False, p_flag=False):
     while 1:
 
         m = meme_process()
@@ -313,7 +313,7 @@ else:
     black = (0,0,0)
     white = (255,255,255)
     lock = threading.Lock()
-    t = threading.Thread(target=generate_meme,args=(lock, 5, 5, args.t, args.p))
+    t = threading.Thread(target=generate_meme,args=(lock, 5, 3000, args.t, args.p))
     t.start()
     clock = pygame.time.Clock()
     global crashed
