@@ -5,3 +5,4 @@ PS5|Me|My bank account
 Twitter|Elon Musk|Teslar
 Steam game sale|Me|200+ Game in My library
 Online game|Me|My internet
+Teslar|Elon Musk|Twitter

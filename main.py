@@ -202,6 +202,31 @@ class meme_process():
                     fill = '#ffffff'
 
                 self.insert_text(font_in=font,text=cap[a], area=area[a], size_in=self.size_in, fill=fill)
+        elif self.meme_type == 8:
+            area = []
+            area.append(self.filename_list[-16:-12])
+            area.append(self.filename_list[-12:-8])
+            area.append(self.filename_list[-8:-4])
+            area.append(self.filename_list[-4:])
+            cap, s = self.res[0].split('|'), self.res[1]
+            for a in range(0,len(area)):
+                for i in range(0,len(area[a])):
+                    if area[a][i] == 'x':
+                        area[a][i] = -1
+                    else:
+                        area[a][i] = int(area[a][i])
+                
+                if self.is_contains_chinese(cap[a]):
+                    font = 'PingFang.ttc'
+                else:
+                    font = 'Arial.ttf'
+
+                if self.filename_list[2] =='b':
+                    fill = '#000000'
+                else:
+                    fill = '#ffffff'
+
+                self.insert_text(font_in=font,text=cap[a], area=area[a], size_in=self.size_in, fill=fill)
         else:
             area = self.filename_list[-4:]
             for i in range(0,len(area)):
