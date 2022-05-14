@@ -313,7 +313,7 @@ else:
     black = (0,0,0)
     white = (255,255,255)
     lock = threading.Lock()
-    t = threading.Thread(target=generate_meme,args=(lock, 5, 3000, args.t, args.p))
+    t = threading.Thread(target=generate_meme,args=(lock, 5, 2000, args.t, args.p))
     t.start()
     clock = pygame.time.Clock()
     global crashed
