@@ -304,7 +304,10 @@ def generate_meme(lock, cnt=10, timer=3000, t_flag=False, p_flag=False):
         lock.release()
         save_path = output+f"{m.filename_list[3]}_{m.s}.png"
         print('display')
-        upload_twitter_check(t_flag, f"{m.filename_list[3]}_{m.s}.png")
+        try:
+            upload_twitter_check(t_flag, f"{m.filename_list[3]}_{m.s}.png")
+        except:
+            pass
 
         m.img.save(output+f"{m.filename_list[3]}_{m.s}.png")
         if crashed:
